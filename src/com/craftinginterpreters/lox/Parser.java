@@ -25,7 +25,22 @@ class Parser {
     // Grammar productions
 
     private Expr expression() {
-        return equality();
+        return ternary();
+    }
+
+    private Expr ternary() {
+        Expr expr = equality();
+
+        if (match(QUESTION_MARK)) {
+            Token leftToken = previous();
+            Expr midExpr = ternary();
+            consume(COLON, "Expect ':' after '?' in ternary expression.");
+            Token rightToken = previous();
+            Expr rightExpr = ternary();
+            expr = new Expr.Ternary(expr, leftToken, midExpr, rightToken, rightExpr);
+        }
+
+        return expr;
     }
 
     private Expr equality() {
