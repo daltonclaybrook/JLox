@@ -6,7 +6,7 @@ import java.util.List;
 import static com.craftinginterpreters.lox.TokenType.*;
 
 class Parser {
-    private static class ParseError extends RuntimeException {}
+    private static class InternalParseError extends RuntimeException {}
 
     private final List<Token> tokens;
     private int current = 0;
@@ -24,6 +24,10 @@ class Parser {
         return statements;
     }
 
+    Expr parseExpression() {
+        return expression();
+    }
+
     // Grammar productions
 
     private Stmt declaration() {
@@ -31,7 +35,7 @@ class Parser {
             if (match(VAR)) return varDeclaration();
 
             return statement();
-        } catch (ParseError error) {
+        } catch (InternalParseError error) {
             synchronize();
             return null;
         }
@@ -237,9 +241,9 @@ class Parser {
         return tokens.get(current - 1);
     }
 
-    private ParseError error(Token token, String message) {
+    private InternalParseError error(Token token, String message) {
         Lox.error(token, message);
-        return new ParseError();
+        return new InternalParseError();
     }
 
     private void synchronize() {

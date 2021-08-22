@@ -10,8 +10,9 @@ import java.util.List;
 
 public class Lox {
     private static final Interpreter interpreter = new Interpreter();
-    static boolean hadError = false;
+    static ParseError parseError = null;
     static boolean hadRuntimeError = false;
+    static boolean isREPL = false;
 
     public static void main(String[] args) throws IOException {
         if (args.length > 1) {
@@ -29,11 +30,12 @@ public class Lox {
         run(new String(bytes, Charset.defaultCharset()));
 
         // Indicate an error in the exit code.
-        if (hadError) System.exit(65);
+        if (parseError != null) System.exit(65);
         if (hadRuntimeError) System.exit(70);
     }
 
     private static void runPrompt() throws IOException {
+        isREPL = true;
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
 
@@ -42,7 +44,7 @@ public class Lox {
             String line = reader.readLine();
             if (line == null) break;
             run(line);
-            hadError = false;
+            parseError = null;
         }
     }
 
@@ -53,21 +55,24 @@ public class Lox {
         Parser parser = new Parser(tokens);
         List<Stmt> statements = parser.parse();
 
-        // Stop if there was a syntax error.
-        if (hadError) return;
-
-        interpreter.interpret(statements);
+        if (parseError == null) {
+            interpreter.interpret(statements);
+        } else if (isREPL) {
+            Parser exprParser = new Parser(tokens);
+            Expr expression = exprParser.parseExpression();
+            interpreter.interpret(expression);
+        }
     }
 
     static void error(int line, String message) {
         report(line, "", message);
     }
 
-    private static void report(int line, String where,
-                               String message) {
-        System.err.println(
-                "[line " + line + "] Error" + where + ": " + message);
-        hadError = true;
+    private static void report(int line, String where, String message) {
+        parseError = new ParseError(line, where, message);
+        if (!isREPL) {
+            System.err.println(parseError.fullMessage());
+        }
     }
 
     static void error(Token token, String message) {
