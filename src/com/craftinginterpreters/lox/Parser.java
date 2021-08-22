@@ -25,7 +25,12 @@ class Parser {
     }
 
     Expr parseExpression() {
-        return expression();
+        try {
+            return expression();
+        } catch (InternalParseError error) {
+            synchronize();
+            return null;
+        }
     }
 
     // Grammar productions
