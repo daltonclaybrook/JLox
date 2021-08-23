@@ -23,8 +23,23 @@ class AstPrinter implements Expr.Visitor<String> {
     }
 
     @Override
+    public String visitLogicalExpr(Expr.Logical expr) {
+        return "Logical expression unimplemented";
+    }
+
+    @Override
     public String visitUnaryExpr(Expr.Unary expr) {
         return parenthesize(expr.operator.lexeme, expr.right);
+    }
+
+    @Override
+    public String visitVariableExpr(Expr.Variable expr) {
+        return "Variable expression unimplemented";
+    }
+
+    @Override
+    public String visitAssignExpr(Expr.Assign expr) {
+        return "Assignment expression unimplemented";
     }
 
     @Override
