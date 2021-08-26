@@ -3,6 +3,13 @@ package com.craftinginterpreters.lox;
 import java.util.List;
 
 class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
+    private static class BreakException extends RuntimeError {
+        BreakException(Token token) {
+            super(token,
+                    "Attempted to 'break' when not in a loop. This should have been a syntax error.");
+        }
+    }
+
     private Environment environment = new Environment();
 
     void interpret(List<Stmt> statements) {
@@ -136,14 +143,6 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
         return evaluate(expr.right);
     }
 
-    @Override
-    public Void visitWhileStmt(Stmt.While stmt) {
-        while (isTruthy(evaluate(stmt.condition))) {
-            execute(stmt.body);
-        }
-        return null;
-    }
-
     // Statement visitor methods
 
     @Override
@@ -185,6 +184,27 @@ class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             execute(stmt.elseBranch);
         }
         return null;
+    }
+
+    @Override
+    public Void visitWhileStmt(Stmt.While stmt) {
+        while (isTruthy(evaluate(stmt.condition))) {
+            try {
+                execute(stmt.body);
+            } catch (BreakException exception) {
+                // Catch a 'BreakException' thrown inside this while loop
+                // and break out of the loop.
+                break;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        // Immediately throw a BreakException if we encounter a break.
+        // This exception is handled by an enclosing "While" statement.
+        throw new BreakException(stmt.breakToken);
     }
 
     // Helpers

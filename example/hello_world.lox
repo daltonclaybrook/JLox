@@ -5,4 +5,15 @@ for (var b = 1; a < 10000; b = temp + b) {
   print a;
   temp = a;
   a = b;
+
+  if (a > 5000) {
+      print "breaking early...";
+      break;
+  }
+
+  print "end of loop";
 }
+
+break;
+
+print "Finished";

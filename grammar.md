@@ -13,6 +13,7 @@ statement      → exprStmt
                | ifStmt
                | printStmt
                | whileStmt
+               | breakStmt
                | block ;
 
 exprStmt       → expression ";" ;
@@ -22,6 +23,7 @@ forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
 ifStmt         → "if" "(" expression ")" statement ( "else" statement )? ;
 printStmt      → "print" expression ";" ;
 whileStmt      → "while" "(" expression ")" statement ;
+breakStmt      → "break" ";" ;
 block          → "{" declaration* "}" ;
 
 expression     → assignment ;
