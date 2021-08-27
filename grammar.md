@@ -3,8 +3,13 @@
 ```
 program        → declaration* EOF ;
 
-declaration    → varDecl
+declaration    → funDecl
+               | varDecl
                | statement ;
+
+funDecl        → "fun" function ;
+function       → IDENTIFIER "(" parameters? ")" block ;
+parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
 
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 
@@ -12,6 +17,7 @@ statement      → exprStmt
                | forStmt
                | ifStmt
                | printStmt
+               | returnStmt
                | whileStmt
                | breakStmt
                | block ;
@@ -22,6 +28,7 @@ forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
                  expression? ")" statement ;
 ifStmt         → "if" "(" expression ")" statement ( "else" statement )? ;
 printStmt      → "print" expression ";" ;
+returnStmt     → "return" expression? ";" ;
 whileStmt      → "while" "(" expression ")" statement ;
 breakStmt      → "break" ";" ;
 block          → "{" declaration* "}" ;
@@ -37,9 +44,8 @@ comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term           → factor ( ( "-" | "+" ) factor )* ;
 factor         → unary ( ( "/" | "*" ) unary )* ;
 unary          → ( "!" | "-" ) unary
-               | primary ;
-primary        → "true" | "false" | "nil"
-               | NUMBER | STRING
-               | "(" expression ")"
-               | IDENTIFIER ;
+               | call ;
+call           → primary ( "(" arguments? ")" )* ;
+arguments      → expression ( "," expression )* ;
+primary        → "true" | "false" | "nil" | NUMBER | STRING | "(" expression ")" | IDENTIFIER ;
 ```
