@@ -16,16 +16,29 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
 
     private enum FunctionType {
         NONE,
-        FUNCTION
+        FUNCTION,
+        METHOD
     }
 
-    // Visitors for creating/destroying scopes and declaring/defining variables
+    // Visitors for creating/destroying scopes and declaring/defining identifiers
 
     @Override
     public Void visitBlockStmt(Stmt.Block stmt) {
         beginScope();
         resolve(stmt.statements);
         endScope();
+        return null;
+    }
+
+    @Override
+    public Void visitClassStmt(Stmt.Class stmt) {
+        declare(stmt.name);
+        define(stmt.name);
+
+        for (Stmt.Function method : stmt.methods) {
+            FunctionType declaration = FunctionType.METHOD;
+            resolveFunction(method, declaration);
+        }
         return null;
     }
 
@@ -124,6 +137,12 @@ class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             resolve(argument);
         }
 
+        return null;
+    }
+
+    @Override
+    public Void visitGetExpr(Expr.Get expr) {
+        resolve(expr.object);
         return null;
     }
 
